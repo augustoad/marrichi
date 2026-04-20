@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PnL Padel Indoor — Modelo Interactivo</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232736;
+    --border: #2e3347;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa3;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --green: #00cec9;
+    --green-dim: rgba(0,206,201,0.15);
+    --red: #ff6b6b;
+    --red-dim: rgba(255,107,107,0.15);
+    --yellow: #feca57;
+    --yellow-dim: rgba(254,202,87,0.15);
+    --orange: #ff9f43;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container { max-width: 1440px; margin: 0 auto; padding: 24px; }
+  header {
+    text-align: center;
+    padding: 32px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  header p { color: var(--text-dim); margin-top: 6px; font-size: 14px; }
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  @media (max-width: 1100px) {
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .icon {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+  .field .unit {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); }
+  .kpi .value { font-size: 26px; font-weight: 700; margin-top: 4px; font-family: 'SF Mono', monospace; }
+  .kpi .sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .kpi.positive .value { color: var(--green); }
+  .kpi.negative .value { color: var(--red); }
+  .kpi.warn .value { color: var(--yellow); }
+  .kpi.accent .value { color: var(--accent2); }
+
+  /* P&L Table */
+  .pnl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pnl-table th, .pnl-table td { padding: 8px 12px; text-align: right; white-space: nowrap; }
+  .pnl-table th:first-child, .pnl-table td:first-child { text-align: left; }
+  .pnl-table thead th { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .pnl-table tbody tr { border-bottom: 1px solid rgba(46,51,71,0.5); }
+  .pnl-table tbody tr:hover { background: rgba(108,92,231,0.05); }
+  .pnl-table .section-header td { font-weight: 600; color: var(--accent2); padding-top: 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pnl-table .subtotal td { font-weight: 700; border-top: 1px solid var(--border); border-bottom: 2px solid var(--border); }
+  .pnl-table .total td { font-weight: 700; border-top: 2px solid var(--accent); color: var(--accent2); font-size: 14px; }
+  .pnl-table .positive-val { color: var(--green); }
+  .pnl-table .negative-val { color: var(--red); }
+  .pnl-table .pct { color: var(--text-dim); font-size: 11px; }
+
+  /* Sensitivity Table */
+  .sense-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: 'SF Mono', monospace; }
+  .sense-table th, .sense-table td { padding: 6px 10px; text-align: right; border: 1px solid var(--border); }
+  .sense-table th { background: var(--surface2); color: var(--text-dim); font-size: 10px; text-transform: uppercase; }
+  .sense-table th:first-child { text-align: left; }
+  .sense-table td:first-child { text-align: left; font-weight: 600; color: var(--text-dim); }
+  .sense-table .cell-green { background: var(--green-dim); color: var(--green); }
+  .sense-table .cell-red { background: var(--red-dim); color: var(--red); }
+  .sense-table .cell-yellow { background: var(--yellow-dim); color: var(--yellow); font-weight: 700; }
+  .sense-table .cell-orange { background: rgba(255,159,67,0.15); color: var(--orange); }
+
+  /* Debt schedule */
+  .debt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .debt-table th, .debt-table td { padding: 6px 10px; text-align: right; }
+  .debt-table th { color: var(--text-dim); font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .debt-table th:first-child { text-align: center; }
+  .debt-table td:first-child { text-align: center; color: var(--text-dim); }
+  .debt-table tbody tr { border-bottom: 1px solid rgba(46,51,71,0.3); }
+  .debt-table tbody tr:hover { background: rgba(108,92,231,0.05); }
+  .debt-table .highlight { background: rgba(0,206,201,0.1); font-weight: 600; }
+
+  /* Chart canvas */
+  .chart-container { position: relative; height: 300px; margin-top: 12px; }
+  canvas { width: 100% !important; height: 100% !important; }
+
+  /* Bar chart via CSS */
+  .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 200px; padding: 0 8px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.4s ease; min-width: 8px; position: relative; }
+  .bar-label { font-size: 9px; color: var(--text-dim); }
+  .bar-value { font-size: 9px; color: var(--text); font-weight: 600; }
+
+  .waterfall { margin-top: 16px; }
+  .wf-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; }
+  .wf-label { width: 180px; color: var(--text-dim); flex-shrink: 0; }
+  .wf-bar-container { flex: 1; height: 24px; position: relative; }
+  .wf-bar { height: 100%; border-radius: 4px; position: absolute; transition: all 0.3s; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 11px; font-weight: 600; }
+  .wf-amount { width: 100px; text-align: right; font-family: 'SF Mono', monospace; font-size: 12px; flex-shrink: 0; margin-left: 8px; }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .tab:hover:not(.active) { border-color: var(--border); color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .reset-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .tooltip { position: relative; cursor: help; }
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .tooltip:hover::after { opacity: 1; }
+
+  .scroll-x { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Padel Indoor — Modelo Financiero Interactivo</h1>
+    <p>4 canchas &middot; GBA Norte &middot; Ajustá las variables y proyectá tu PnL mensual</p>
+  </header>
+
+  <!-- KPI Dashboard -->
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="two-col">
+    <!-- LEFT: Inputs -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="section-title" style="margin:0;border:none;padding:0"><span class="dot"></span> Variables</div>
+        <div style="display:flex;gap:6px">
+          <button class="reset-btn" id="share-btn" onclick="shareLink()">↗ Compartir</button>
+          <button class="reset-btn" onclick="resetDefaults()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Infrastructure -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">C</span> Infraestructura</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Cantidad de canchas</label>
+            <input type="number" id="numCourts" value="2" min="1" max="20" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Superficie total (m²)</label>
+            <input type="number" id="surfaceM2" value="714" min="200" step="50" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Horas operativas / día</label>
+            <input type="number" id="opHours" value="16.5" min="6" max="24" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Duración turno (horas)</label>
+            <input type="number" id="turnDuration" value="1.5" min="0.5" max="3" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Días operativos / mes</label>
+          <input type="number" id="opDays" value="30" min="20" max="31" step="1" oninput="calc()">
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">$</span> Precios por turno (ARS)</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Peak (18-23hs L-V + Finde)</label>
+            <input type="number" id="pricePeak" value="60000" min="10000" step="5000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Off-Peak (08-18hs L-V)</label>
+            <input type="number" id="priceOffPeak" value="45000" min="10000" step="5000" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Occupancy -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">%</span> Ocupación por franja</h2>
+        <div class="field">
+          <label>Off-Peak L-V (08-18hs): <strong id="occOffPeakVal">35%</strong></label>
+          <input type="range" id="occOffPeak" value="0.35" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+        </div>
+        <div class="field">
+          <label>Peak L-V (18-23hs): <strong id="occPeakVal">90%</strong></label>
+          <input type="range" id="occPeak" value="0.9" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+        </div>
+        <div class="field">
+          <label>Finde (08-23hs): <strong id="occWeekendVal">85%</strong></label>
+          <input type="range" id="occWeekend" value="0.85" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occWeekendVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+        </div>
+      </div>
+
+      <!-- Other Revenue -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">+</span> Otros ingresos mensuales (ARS)</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Escuela / Clases</label>
+            <input type="number" id="revSchool" value="1800000" min="0" step="100000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Bar / Cafetería</label>
+            <input type="number" id="revCantina" value="2500000" min="0" step="100000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Torneos y Eventos</label>
+            <input type="number" id="revTournaments" value="700000" min="0" step="100000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Shop (paletas, ropa, accesorios)</label>
+            <input type="number" id="revShop" value="900000" min="0" step="100000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Kinesiología</label>
+            <input type="number" id="revKinesio" value="1200000" min="0" step="100000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Otros (sponsorships, etc.)</label>
+            <input type="number" id="revOther" value="200000" min="0" step="50000" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable Costs -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">V</span> Costos variables</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Comisión plataformas (%)</label>
+            <input type="number" id="commPlatform" value="3" min="0" max="20" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Costo mercadería cantina (%)</label>
+            <input type="number" id="cogsCantina" value="35" min="0" max="100" step="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Honorarios profesores (%)</label>
+            <input type="number" id="teacherFee" value="55" min="0" max="100" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Comisión medios de pago (%)</label>
+            <input type="number" id="paymentComm" value="3" min="0" max="10" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>COGS Shop (%)</label>
+            <input type="number" id="cogsShop" value="55" min="0" max="100" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Honorarios kinesiólogo (%)</label>
+            <input type="number" id="kinesioFee" value="55" min="0" max="100" step="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Consumibles canchas (ARS/mes)</label>
+          <input type="number" id="consumables" value="200000" min="0" step="50000" oninput="calc()">
+        </div>
+      </div>
+
+      <!-- Fixed Costs -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">F</span> Costos fijos mensuales</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Tipo de cambio USD/ARS</label>
+            <input type="number" id="fxRate" value="1500" min="100" step="50" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Alquiler (USD/m²/mes)</label>
+            <input type="number" id="rentUsdM2" value="7.5" min="1" max="30" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Sueldos + cargas sociales</label>
+            <input type="number" id="salaries" value="5500000" min="0" step="500000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Electricidad</label>
+            <input type="number" id="electricity" value="2400000" min="0" step="100000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Agua + Gas + Internet + Alarma</label>
+            <input type="number" id="utilities" value="500000" min="0" step="10000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Mantenimiento canchas</label>
+            <input type="number" id="maintenance" value="350000" min="0" step="50000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Marketing y publicidad</label>
+            <input type="number" id="marketing" value="900000" min="0" step="50000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Seguros (RC + instalaciones)</label>
+            <input type="number" id="insurance" value="350000" min="0" step="50000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Software gestión + facturación</label>
+            <input type="number" id="software" value="180000" min="0" step="10000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Otros gastos fijos</label>
+            <input type="number" id="otherFixed" value="300000" min="0" step="50000" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Seguro de caución (% anual s/ alquiler)</label>
+          <input type="number" id="cautionRate" value="4" min="0" max="20" step="0.5" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Sueldo socios (ARS/mes)</label>
+          <input type="number" id="partnerSalary" value="0" min="0" step="500000" oninput="calc()">
+        </div>
+      </div>
+
+      <!-- Taxes -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">T</span> Impuestos</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Ingresos Brutos IIBB (%)</label>
+            <input type="number" id="taxIIBB" value="3.5" min="0" max="10" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Impuesto a las Ganancias (%)</label>
+            <input type="number" id="taxIncome" value="35" min="0" max="50" step="1" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- CAPEX & Financing -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon">K</span> CAPEX e inversión (USD)</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Construcción canchas (2 × ~22.5K)</label>
+            <input type="number" id="capexCourts" value="45000" min="0" step="5000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Obra civil (recep, vest, bar, kinesio)</label>
+            <input type="number" id="capexCivil" value="55000" min="0" step="5000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Climatización / ventilación</label>
+            <input type="number" id="capexHVAC" value="15000" min="0" step="1000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Equipamiento bar / cafetería</label>
+            <input type="number" id="capexCantina" value="10000" min="0" step="1000" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Mobiliario + Shop + Kinesio</label>
+            <input type="number" id="capexFurniture" value="12000" min="0" step="1000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Marketing lanzamiento</label>
+            <input type="number" id="capexMarketing" value="4000" min="0" step="1000" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Capital de trabajo (no se deprecia)</label>
+          <input type="number" id="capexWorkingCap" value="30000" min="0" step="5000" oninput="calc()">
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px">
+          Se depreciaron solo los activos físicos (canchas, obra civil, HVAC, bar, mobiliario). Marketing de lanzamiento y capital de trabajo no.
+        </div>
+      </div>
+
+      <!-- Equity -->
+      <div class="card">
+        <h2><span class="icon">E</span> Equity / Inversor</h2>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;padding:8px 10px;background:var(--surface2);border-radius:6px">
+          Asunción: el inversor aporta el <strong>100% del CAPEX</strong>. El % de participación define cómo se reparte el FCF.
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>% Participación inversor</label>
+            <input type="number" id="investorShare" value="50" min="0" max="100" step="5" oninput="document.getElementById('operatorShare').value=Math.max(0,100-this.value);calc()">
+          </div>
+          <div class="field">
+            <label>% Participación operadores</label>
+            <input type="number" id="operatorShare" value="50" min="0" max="100" step="5" oninput="document.getElementById('investorShare').value=Math.max(0,100-this.value);calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Horizonte de proyección (meses)</label>
+          <input type="number" id="projectionMonths" value="36" min="6" max="120" step="6" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Vida útil activos (años) — depreciación</label>
+          <input type="number" id="assetLife" value="10" min="3" max="30" step="1" oninput="calc()">
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div>
+      <div class="section-title"><span class="dot"></span> P&L Mensual</div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="scroll-x">
+          <table class="pnl-table" id="pnl-table"></table>
+        </div>
+      </div>
+
+      <!-- Waterfall -->
+      <div class="section-title"><span class="dot"></span> Waterfall — De Ingresos a Resultado Neto</div>
+      <div class="card" style="margin-bottom:20px">
+        <div id="waterfall"></div>
+      </div>
+
+      <!-- Revenue Breakdown -->
+      <div class="section-title"><span class="dot"></span> Composición de Ingresos</div>
+      <div class="card" style="margin-bottom:20px">
+        <div id="revenue-breakdown"></div>
+      </div>
+
+      <!-- Sensitivity -->
+      <div class="section-title"><span class="dot"></span> Análisis de Sensibilidad</div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this, 'sense-ebitda')">EBITDA vs Ocupación × Precio Peak (ARS)</div>
+        <div class="tab" onclick="switchTab(this, 'sense-payback')">Payback Inversor vs Ocupación × Precio Peak (ARS)</div>
+        <div class="tab" onclick="switchTab(this, 'sense-rent')">EBITDA vs Alquiler × Ocupación</div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="tab-content active" id="sense-ebitda"><div class="scroll-x"><table class="sense-table" id="sense-ebitda-table"></table></div></div>
+        <div class="tab-content" id="sense-payback"><div class="scroll-x"><table class="sense-table" id="sense-payback-table"></table></div></div>
+        <div class="tab-content" id="sense-rent"><div class="scroll-x"><table class="sense-table" id="sense-rent-table"></table></div></div>
+      </div>
+
+      <!-- Investor Distribution Schedule -->
+      <div class="section-title"><span class="dot"></span> Distribución al Inversor — Recupero de Equity</div>
+      <div class="card">
+        <div class="scroll-x">
+          <table class="debt-table" id="debt-table"></table>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">% del equity recuperado por el inversor</div>
+          <div class="progress-bar"><div class="progress-fill" id="debt-progress" style="width:0%;background:var(--accent)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-top:4px">
+            <span>0%</span><span id="debt-coverage-pct">0%</span><span>100%+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = id => parseFloat($(id).value) || 0;
+const fmt = (n, d=0) => {
+  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(d > 0 ? 1 : 0) + 'K';
+  return n.toFixed(d);
+};
+const fmtFull = n => n.toLocaleString('es-AR', {maximumFractionDigits:0});
+const pct = n => (n*100).toFixed(1) + '%';
+
+function getInputs() {
+  const courts = v('numCourts');
+  const surface = v('surfaceM2');
+  const opHours = v('opHours');
+  const turnDur = v('turnDuration');
+  const opDays = v('opDays');
+  const pricePeak = v('pricePeak');
+  const priceOffPeak = v('priceOffPeak');
+  const occOffPeak = v('occOffPeak');
+  const occPeak = v('occPeak');
+  const occWeekend = v('occWeekend');
+  const turnsPerCourtDay = Math.floor(opHours / turnDur);
+
+  // Turn distribution: weekday = 22 days, weekend = 8 days
+  const weekdays = 22;
+  const weekendDays = opDays - weekdays;
+
+  // Off-peak: 07-18 = 11 hours, Peak = remaining turns of the day
+  const offPeakHours = 11; // 07:00-18:00
+  const offPeakTurnsPerCourt = Math.floor(offPeakHours / turnDur);
+  const peakTurnsPerCourt = turnsPerCourtDay - offPeakTurnsPerCourt;
+  const weekendTurnsPerCourt = turnsPerCourtDay;
+
+  // Gross potential
+  const offPeakGross = offPeakTurnsPerCourt * weekdays * courts;
+  const peakGross = peakTurnsPerCourt * weekdays * courts;
+  const weekendGross = weekendTurnsPerCourt * weekendDays * courts;
+
+  // Effective
+  const offPeakEff = offPeakGross * occOffPeak;
+  const peakEff = peakGross * occPeak;
+  const weekendEff = weekendGross * occWeekend;
+
+  // Revenue from courts
+  const revCourts = offPeakEff * priceOffPeak + peakEff * pricePeak + weekendEff * pricePeak;
+
+  // Other revenue
+  const revSchool = v('revSchool');
+  const revCantina = v('revCantina');
+  const revTournaments = v('revTournaments');
+  const revShop = v('revShop');
+  const revKinesio = v('revKinesio');
+  const revOtherInc = v('revOther');
+
+  const grossRevenue = revCourts + revSchool + revCantina + revTournaments + revShop + revKinesio + revOtherInc;
+
+  // IIBB
+  const iibbRate = v('taxIIBB') / 100;
+  const iibb = grossRevenue * iibbRate;
+  const netRevenue = grossRevenue - iibb;
+
+  // Variable costs
+  const commPlatform = revCourts * (v('commPlatform') / 100);
+  const cogsCant = revCantina * (v('cogsCantina') / 100);
+  const teacherFees = revSchool * (v('teacherFee') / 100);
+  const cogsShop = revShop * (v('cogsShop') / 100);
+  const kinesioFees = revKinesio * (v('kinesioFee') / 100);
+  const paymentComm = grossRevenue * (v('paymentComm') / 100);
+  const consumablesCost = v('consumables');
+  const totalVarCosts = commPlatform + cogsCant + teacherFees + cogsShop + kinesioFees + paymentComm + consumablesCost;
+
+  const contributionMargin = netRevenue - totalVarCosts;
+
+  // Fixed costs
+  const fx = v('fxRate');
+  const rent = surface * v('rentUsdM2') * fx;
+  const sal = v('salaries');
+  const elec = v('electricity');
+  const util = v('utilities');
+  const maint = v('maintenance');
+  const mkt = v('marketing');
+  const ins = v('insurance');
+  const soft = v('software');
+  const otherFix = v('otherFixed');
+  const partnerSal = v('partnerSalary');
+  const caution = rent * (v('cautionRate') / 100);
+  const totalInsurance = ins + caution;
+  const totalFixed = rent + sal + elec + util + maint + mkt + totalInsurance + soft + otherFix + partnerSal;
+
+  const ebitda = contributionMargin - totalFixed;
+
+  // CAPEX — total invested by investor
+  const capex = (v('capexCourts') + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture') + v('capexMarketing') + v('capexWorkingCap'));
+  const capexARS = capex * fx;
+
+  // Depreciation — only physical fixed assets (NOT working capital, NOT launch marketing)
+  const depreciableUSD = v('capexCourts') + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture');
+  const depreciableARS = depreciableUSD * fx;
+  const depreciation = depreciableARS / v('assetLife') / 12;
+
+  const ebit = ebitda - depreciation;
+
+  // Income tax (no debt = no interest)
+  const incomeTax = ebit > 0 ? ebit * (v('taxIncome') / 100) : 0;
+  const netIncome = ebit - incomeTax;
+
+  // Occupancy weighted
+  const totalTurns = offPeakGross + peakGross + weekendGross;
+  const effTurns = offPeakEff + peakEff + weekendEff;
+  const occWeighted = totalTurns > 0 ? effTurns / totalTurns : 0;
+
+  // Free cash flow = EBITDA - Income Tax (no debt → no interest)
+  const freeCF = ebitda - incomeTax;
+
+  // Equity / Investor distribution
+  const investorShare = v('investorShare') / 100;
+  const operatorShare = 1 - investorShare;
+  const investorCF = freeCF * investorShare;
+  const operatorCF = freeCF * operatorShare;
+  const projectionMonths = v('projectionMonths');
+
+  // Payback for investor: months to recover their full equity from their share of FCF
+  const investorEquityARS = capexARS; // Investor put 100% of CAPEX
+  const paybackMonths = investorCF > 0 ? investorEquityARS / investorCF : Infinity;
+  const paybackYears = paybackMonths / 12;
+  const freeCFAnnual = freeCF * 12;
+
+  return {
+    courts, surface, turnsPerCourtDay, opDays,
+    pricePeak, priceOffPeak,
+    occOffPeak, occPeak, occWeekend, occWeighted,
+    offPeakGross, peakGross, weekendGross, totalTurns,
+    offPeakEff, peakEff, weekendEff, effTurns,
+    revCourts, revSchool, revCantina, revTournaments, revShop, revKinesio, revOtherInc,
+    grossRevenue, iibb, iibbRate, netRevenue,
+    commPlatform, cogsCant, teacherFees, cogsShop, kinesioFees, paymentComm, consumablesCost, totalVarCosts,
+    contributionMargin,
+    rent, sal, elec, util, maint, mkt, totalInsurance, ins, caution, soft, otherFix, partnerSal, totalFixed,
+    ebitda, depreciation, ebit, incomeTax, netIncome,
+    capex, capexARS, depreciableUSD,
+    paybackMonths, paybackYears,
+    freeCF, freeCFAnnual, fx,
+    investorShare, operatorShare, investorCF, operatorCF, investorEquityARS, projectionMonths
+  };
+}
+
+function renderKPIs(d) {
+  const kpiRow = $('kpi-row');
+  const ebitdaClass = d.ebitda > 0 ? 'positive' : 'negative';
+  const netClass = d.netIncome > 0 ? 'positive' : 'negative';
+  const paybackClass = d.paybackYears <= 2 ? 'positive' : d.paybackYears <= 4 ? 'warn' : 'negative';
+  const margin = d.netRevenue > 0 ? d.ebitda / d.netRevenue : 0;
+
+  const fx = d.fx;
+  const fmtUSD = (val) => 'USD ' + fmtFull(Math.round(val / fx));
+
+  const investorROI = d.investorEquityARS > 0 ? (d.investorCF * 12) / d.investorEquityARS : 0;
+
+  kpiRow.innerHTML = `
+    <div class="kpi ${ebitdaClass}">
+      <div class="label">EBITDA Mensual</div>
+      <div class="value">${fmtUSD(d.ebitda)}</div>
+      <div class="sub">Margen ${pct(margin)}</div>
+    </div>
+    <div class="kpi ${netClass}">
+      <div class="label">Resultado Neto</div>
+      <div class="value">${fmtUSD(d.netIncome)}</div>
+      <div class="sub">${d.netRevenue > 0 ? pct(d.netIncome / d.netRevenue) : '0%'} s/ ingresos netos</div>
+    </div>
+    <div class="kpi ${d.freeCF > 0 ? 'positive' : 'negative'}">
+      <div class="label">Free Cash Flow</div>
+      <div class="value">${fmtUSD(d.freeCF)}</div>
+      <div class="sub">EBITDA - Imp. Ganancias</div>
+    </div>
+    <div class="kpi accent">
+      <div class="label">Ocupación Ponderada</div>
+      <div class="value">${pct(d.occWeighted)}</div>
+      <div class="sub">${fmtFull(Math.round(d.effTurns))} turnos efectivos/mes</div>
+    </div>
+    <div class="kpi ${paybackClass}">
+      <div class="label">Payback Inversor</div>
+      <div class="value">${d.paybackYears === Infinity ? '∞' : d.paybackYears.toFixed(1) + ' años'}</div>
+      <div class="sub">ROI anual ${pct(investorROI)} · ${(d.investorShare*100).toFixed(0)}% participación</div>
+    </div>
+    <div class="kpi accent">
+      <div class="label">CAPEX Total (Equity)</div>
+      <div class="value">USD ${fmtFull(d.capex)}</div>
+      <div class="sub">TC: ${fmtFull(Math.round(fx))} ARS/USD</div>
+    </div>
+  `;
+}
+
+function renderPnL(d) {
+  const t = $('pnl-table');
+  const fx = d.fx;
+  const nr = d.netRevenue;
+  const p = (val) => nr > 0 ? `<span class="pct">${pct(val/nr)}</span>` : '';
+  const u = (val) => fmtFull(Math.round(val / fx));
+  const uNeg = (val) => '-' + fmtFull(Math.round(val / fx));
+
+  t.innerHTML = `
+    <thead><tr><th>Concepto</th><th>USD / mes</th><th>% Ing. Neto</th></tr></thead>
+    <tbody>
+      <tr class="section-header"><td colspan="3">Ingresos</td></tr>
+      <tr><td>Alquiler de canchas</td><td>${u(d.revCourts)}</td><td>${p(d.revCourts)}</td></tr>
+      <tr><td>Escuela / Clases</td><td>${u(d.revSchool)}</td><td>${p(d.revSchool)}</td></tr>
+      <tr><td>Bar / Cafetería</td><td>${u(d.revCantina)}</td><td>${p(d.revCantina)}</td></tr>
+      <tr><td>Torneos y Eventos</td><td>${u(d.revTournaments)}</td><td>${p(d.revTournaments)}</td></tr>
+      <tr><td>Shop</td><td>${u(d.revShop)}</td><td>${p(d.revShop)}</td></tr>
+      <tr><td>Kinesiología</td><td>${u(d.revKinesio)}</td><td>${p(d.revKinesio)}</td></tr>
+      <tr><td>Otros ingresos</td><td>${u(d.revOtherInc)}</td><td>${p(d.revOtherInc)}</td></tr>
+      <tr class="subtotal"><td>Ingresos Brutos</td><td>${u(d.grossRevenue)}</td><td></td></tr>
+      <tr><td>(-) IIBB (${pct(d.iibbRate)})</td><td class="negative-val">${uNeg(d.iibb)}</td><td></td></tr>
+      <tr class="subtotal"><td>Ingresos Netos</td><td>${u(d.netRevenue)}</td><td><span class="pct">100.0%</span></td></tr>
+
+      <tr class="section-header"><td colspan="3">Costos Variables</td></tr>
+      <tr><td>Comisión plataformas reserva</td><td class="negative-val">${uNeg(d.commPlatform)}</td><td>${p(-d.commPlatform)}</td></tr>
+      <tr><td>Costo mercadería bar</td><td class="negative-val">${uNeg(d.cogsCant)}</td><td>${p(-d.cogsCant)}</td></tr>
+      <tr><td>Honorarios profesores</td><td class="negative-val">${uNeg(d.teacherFees)}</td><td>${p(-d.teacherFees)}</td></tr>
+      <tr><td>COGS Shop</td><td class="negative-val">${uNeg(d.cogsShop)}</td><td>${p(-d.cogsShop)}</td></tr>
+      <tr><td>Honorarios kinesiólogo</td><td class="negative-val">${uNeg(d.kinesioFees)}</td><td>${p(-d.kinesioFees)}</td></tr>
+      <tr><td>Comisión medios de pago</td><td class="negative-val">${uNeg(d.paymentComm)}</td><td>${p(-d.paymentComm)}</td></tr>
+      <tr><td>Consumibles canchas</td><td class="negative-val">${uNeg(d.consumablesCost)}</td><td>${p(-d.consumablesCost)}</td></tr>
+      <tr class="subtotal"><td>Total Costos Variables</td><td class="negative-val">${uNeg(d.totalVarCosts)}</td><td>${p(-d.totalVarCosts)}</td></tr>
+
+      <tr class="subtotal"><td>Margen de Contribución</td><td class="${d.contributionMargin>=0?'positive-val':'negative-val'}">${u(d.contributionMargin)}</td><td>${p(d.contributionMargin)}</td></tr>
+
+      <tr class="section-header"><td colspan="3">Costos Fijos</td></tr>
+      <tr><td>Alquiler terreno/predio</td><td class="negative-val">${uNeg(d.rent)}</td><td>${p(-d.rent)}</td></tr>
+      <tr><td>Sueldos + cargas sociales</td><td class="negative-val">${uNeg(d.sal)}</td><td>${p(-d.sal)}</td></tr>
+      <tr><td>Electricidad</td><td class="negative-val">${uNeg(d.elec)}</td><td>${p(-d.elec)}</td></tr>
+      <tr><td>Agua + Gas + Internet + Alarma</td><td class="negative-val">${uNeg(d.util)}</td><td>${p(-d.util)}</td></tr>
+      <tr><td>Mantenimiento canchas</td><td class="negative-val">${uNeg(d.maint)}</td><td>${p(-d.maint)}</td></tr>
+      <tr><td>Marketing y publicidad</td><td class="negative-val">${uNeg(d.mkt)}</td><td>${p(-d.mkt)}</td></tr>
+      <tr><td>Seguros (RC + caución)</td><td class="negative-val">${uNeg(d.totalInsurance)}</td><td>${p(-d.totalInsurance)}</td></tr>
+      <tr><td>Software gestión</td><td class="negative-val">${uNeg(d.soft)}</td><td>${p(-d.soft)}</td></tr>
+      <tr><td>Sueldo socios</td><td class="negative-val">${uNeg(d.partnerSal)}</td><td>${p(-d.partnerSal)}</td></tr>
+      <tr><td>Otros gastos fijos</td><td class="negative-val">${uNeg(d.otherFix)}</td><td>${p(-d.otherFix)}</td></tr>
+      <tr class="subtotal"><td>Total Costos Fijos</td><td class="negative-val">${uNeg(d.totalFixed)}</td><td>${p(-d.totalFixed)}</td></tr>
+
+      <tr class="total"><td>EBITDA</td><td class="${d.ebitda>=0?'positive-val':'negative-val'}">${u(d.ebitda)}</td><td>${p(d.ebitda)}</td></tr>
+
+      <tr><td>(-) Depreciación y Amortización</td><td class="negative-val">${uNeg(d.depreciation)}</td><td></td></tr>
+      <tr class="subtotal"><td>EBIT</td><td class="${d.ebit>=0?'positive-val':'negative-val'}">${u(d.ebit)}</td><td>${p(d.ebit)}</td></tr>
+      <tr><td>(-) Impuesto a las Ganancias</td><td class="negative-val">${uNeg(d.incomeTax)}</td><td></td></tr>
+      <tr class="total"><td>RESULTADO NETO</td><td class="${d.netIncome>=0?'positive-val':'negative-val'}">${u(d.netIncome)}</td><td>${p(d.netIncome)}</td></tr>
+
+      <tr class="section-header"><td colspan="3">Flujo de Caja</td></tr>
+      <tr><td>EBITDA</td><td>${u(d.ebitda)}</td><td></td></tr>
+      <tr><td>(-) Impuesto a las Ganancias</td><td class="negative-val">${uNeg(d.incomeTax)}</td><td></td></tr>
+      <tr class="total"><td>FREE CASH FLOW</td><td class="${d.freeCF>=0?'positive-val':'negative-val'}">${u(d.freeCF)}</td><td>${p(d.freeCF)}</td></tr>
+      <tr><td>FCF Anualizado</td><td class="${d.freeCF>=0?'positive-val':'negative-val'}">${u(d.freeCF*12)}</td><td></td></tr>
+
+      <tr class="section-header"><td colspan="3">Distribución a Socios</td></tr>
+      <tr><td>Inversor (${(d.investorShare*100).toFixed(0)}%)</td><td class="${d.investorCF>=0?'positive-val':'negative-val'}">${u(d.investorCF)}</td><td>${p(d.investorCF)}</td></tr>
+      <tr><td>Operadores (${(d.operatorShare*100).toFixed(0)}%)</td><td class="${d.operatorCF>=0?'positive-val':'negative-val'}">${u(d.operatorCF)}</td><td>${p(d.operatorCF)}</td></tr>
+    </tbody>
+  `;
+}
+
+function renderWaterfall(d) {
+  const fx = d.fx;
+  const items = [
+    { label: 'Ingresos Brutos', val: d.grossRevenue / fx, color: 'var(--accent2)' },
+    { label: '(-) IIBB', val: -d.iibb / fx, color: 'var(--red)' },
+    { label: '(-) Costos Variables', val: -d.totalVarCosts / fx, color: 'var(--red)' },
+    { label: '(-) Costos Fijos', val: -d.totalFixed / fx, color: 'var(--red)' },
+    { label: '= EBITDA', val: d.ebitda / fx, color: d.ebitda >= 0 ? 'var(--green)' : 'var(--red)', isTotal: true },
+    { label: '(-) Depreciación', val: -d.depreciation / fx, color: 'var(--orange)' },
+    { label: '(-) Imp. Ganancias', val: -d.incomeTax / fx, color: 'var(--orange)' },
+    { label: '= Resultado Neto', val: d.netIncome / fx, color: d.netIncome >= 0 ? 'var(--green)' : 'var(--red)', isTotal: true },
+  ];
+  const maxVal = Math.max(...items.map(i => Math.abs(i.val)));
+  const el = $('waterfall');
+  el.innerHTML = items.map(item => {
+    const width = maxVal > 0 ? (Math.abs(item.val) / maxVal * 80) : 0;
+    const isNeg = item.val < 0;
+    const fw = item.isTotal ? 'font-weight:700;' : '';
+    return `<div class="wf-row" style="${fw}">
+      <div class="wf-label">${item.label}</div>
+      <div class="wf-bar-container">
+        <div class="wf-bar" style="width:${width}%;background:${item.color};opacity:${item.isTotal?1:0.7}"></div>
+      </div>
+      <div class="wf-amount" style="color:${item.color}">${isNeg ? '-' : ''}USD ${fmtFull(Math.round(Math.abs(item.val)))}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderRevenueBreakdown(d) {
+  const items = [
+    { label: 'Canchas', val: d.revCourts, color: '#6c5ce7' },
+    { label: 'Escuela', val: d.revSchool, color: '#a29bfe' },
+    { label: 'Bar', val: d.revCantina, color: '#00cec9' },
+    { label: 'Torneos', val: d.revTournaments, color: '#feca57' },
+    { label: 'Shop', val: d.revShop, color: '#ff9f43' },
+    { label: 'Kinesio', val: d.revKinesio, color: '#ff6b6b' },
+    { label: 'Otros', val: d.revOtherInc, color: '#8b8fa3' },
+  ];
+  const total = items.reduce((s,i) => s + i.val, 0);
+  const el = $('revenue-breakdown');
+  // Stacked bar
+  el.innerHTML = `
+    <div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin-bottom:12px">
+      ${items.map(i => `<div style="width:${total>0?i.val/total*100:0}%;background:${i.color};transition:width 0.3s" title="${i.label}: ${pct(total>0?i.val/total:0)}"></div>`).join('')}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12px">
+      ${items.map(i => `<div style="display:flex;align-items:center;gap:6px">
+        <div style="width:10px;height:10px;border-radius:3px;background:${i.color}"></div>
+        <span>${i.label}</span>
+        <span style="color:var(--text-dim)">USD ${fmtFull(Math.round(i.val/d.fx))} (${total>0?pct(i.val/total):'0%'})</span>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+function computeEBITDAForSensitivity(occWeighted, peakPrice) {
+  const d = getInputs();
+  // Recalculate revenue from courts using weighted occupancy
+  const totalPotentialTurns = d.totalTurns;
+  const effTurns = totalPotentialTurns * occWeighted;
+  // Approximate: use a weighted average price
+  const offPeakShare = d.offPeakGross / d.totalTurns;
+  const peakShare = (d.peakGross + d.weekendGross) / d.totalTurns;
+  const offPeakPrice = d.priceOffPeak;
+  // Recalc with new peak price
+  const avgPrice = offPeakShare * offPeakPrice + peakShare * peakPrice;
+  const revCourts = effTurns * avgPrice;
+
+  const grossRev = revCourts + d.revSchool + d.revCantina + d.revTournaments + d.revShop + d.revKinesio + d.revOtherInc;
+  const iibb = grossRev * d.iibbRate;
+  const netRev = grossRev - iibb;
+
+  // Variable costs (recalculated)
+  const commPlat = revCourts * (v('commPlatform') / 100);
+  const cogsCant = d.revCantina * (v('cogsCantina') / 100);
+  const teacherF = d.revSchool * (v('teacherFee') / 100);
+  const cogsShopS = d.revShop * (v('cogsShop') / 100);
+  const kinesioFS = d.revKinesio * (v('kinesioFee') / 100);
+  const payComm = grossRev * (v('paymentComm') / 100);
+  const totalVar = commPlat + cogsCant + teacherF + cogsShopS + kinesioFS + payComm + d.consumablesCost;
+
+  const contribMargin = netRev - totalVar;
+  const ebitda = contribMargin - d.totalFixed;
+  return ebitda;
+}
+
+function renderSensitivityEBITDA() {
+  const d = getInputs();
+  const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
+  const prices = [35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000];
+  const currentOcc = d.occWeighted;
+  const currentPrice = d.pricePeak;
+
+  const fx = d.fx;
+  let html = '<thead><tr><th>EBITDA (USD/mes)</th>';
+  prices.forEach(p => {
+    const isCurrent = p === currentPrice;
+    html += `<th${isCurrent?' style="color:var(--yellow)"':''}>${fmtFull(p)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  occs.forEach(occ => {
+    html += `<tr><td>${pct(occ)}</td>`;
+    prices.forEach(price => {
+      const ebitda = computeEBITDAForSensitivity(occ, price);
+      const isBase = Math.abs(occ - currentOcc) < 0.03 && price === currentPrice;
+      let cls = ebitda > 0 ? 'cell-green' : 'cell-red';
+      if (isBase) cls = 'cell-yellow';
+      html += `<td class="${cls}">${fmtFull(Math.round(ebitda/fx))}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  $('sense-ebitda-table').innerHTML = html;
+}
+
+function renderSensitivityPayback() {
+  const d = getInputs();
+  const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
+  const prices = [35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000];
+
+  let html = '<thead><tr><th>Payback (años)</th>';
+  prices.forEach(p => html += `<th>${fmtFull(p)}</th>`);
+  html += '</tr></thead><tbody>';
+
+  occs.forEach(occ => {
+    html += `<tr><td>${pct(occ)}</td>`;
+    prices.forEach(price => {
+      const ebitda = computeEBITDAForSensitivity(occ, price);
+      const ebitSens = ebitda - d.depreciation;
+      const taxSens = ebitSens > 0 ? ebitSens * (v('taxIncome') / 100) : 0;
+      const fcfSens = ebitda - taxSens;
+      const investorCFSens = fcfSens * d.investorShare;
+      const payback = investorCFSens > 0 ? d.investorEquityARS / investorCFSens / 12 : Infinity;
+      let cls = 'cell-red';
+      if (payback <= 2) cls = 'cell-green';
+      else if (payback <= 4) cls = 'cell-orange';
+      else if (payback !== Infinity) cls = 'cell-red';
+      const display = payback === Infinity ? '—' : payback.toFixed(1);
+      html += `<td class="${cls}">${display}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  $('sense-payback-table').innerHTML = html;
+}
+
+function renderSensitivityRent() {
+  const d = getInputs();
+  const rents = [4, 5, 6, 7, 8, 9, 10];
+  const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
+
+  // Fixed costs without rent
+  const fixedNoRent = d.totalFixed - d.rent;
+
+  const fx = d.fx;
+  let html = '<thead><tr><th>EBITDA (USD/mes)</th>';
+  occs.forEach(o => html += `<th>${pct(o)}</th>`);
+  html += '</tr></thead><tbody>';
+
+  rents.forEach(rentUsd => {
+    html += `<tr><td>USD ${rentUsd}/m²</td>`;
+    occs.forEach(occ => {
+      const rentARS = d.surface * rentUsd * d.fx;
+      const caution = rentARS * 12 * (v('cautionRate') / 100) / 12;
+      const rentDiff = rentARS - d.rent;
+      const cautionDiff = caution - d.caution;
+      const ebitdaBase = computeEBITDAForSensitivity(occ, d.pricePeak);
+      const ebitda = ebitdaBase - rentDiff - cautionDiff;
+      const isBase = rentUsd === v('rentUsdM2') && Math.abs(occ - d.occWeighted) < 0.03;
+      let cls = ebitda > 0 ? 'cell-green' : 'cell-red';
+      if (isBase) cls = 'cell-yellow';
+      html += `<td class="${cls}">${fmtFull(Math.round(ebitda/fx))}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  $('sense-rent-table').innerHTML = html;
+}
+
+function renderDebtSchedule(d) {
+  const t = $('debt-table');
+  const fx = d.fx;
+  const term = Math.round(d.projectionMonths);
+  const fU = (val) => fmtFull(Math.round(val / fx));
+
+  const equity = d.investorEquityARS;
+  const investorMonthly = d.investorCF;
+  const operatorMonthly = d.operatorCF;
+
+  let html = '<thead><tr><th>Mes</th><th>FCF Total</th><th>Inversor (' + (d.investorShare*100).toFixed(0) + '%)</th><th>Operadores (' + (d.operatorShare*100).toFixed(0) + '%)</th><th>Acum. Inversor</th><th>% Equity Recup.</th><th>Equity Pendiente</th></tr></thead><tbody>';
+
+  let acumInv = 0;
+  let acumOp = 0;
+  let recoveryMonth = null;
+  for (let m = 1; m <= term; m++) {
+    acumInv += investorMonthly;
+    acumOp += operatorMonthly;
+    const pctRec = equity > 0 ? acumInv / equity : 0;
+    const pendiente = equity - acumInv;
+    if (pctRec >= 1 && recoveryMonth === null) recoveryMonth = m;
+    const isHighlight = m === term || (recoveryMonth === m);
+    html += `<tr class="${isHighlight ? 'highlight' : ''}">
+      <td>${m}</td>
+      <td class="${d.freeCF>=0?'positive-val':'negative-val'}">${fU(d.freeCF)}</td>
+      <td class="${investorMonthly>=0?'positive-val':'negative-val'}">${fU(investorMonthly)}</td>
+      <td class="${operatorMonthly>=0?'positive-val':'negative-val'}">${fU(operatorMonthly)}</td>
+      <td>${fU(acumInv)}</td>
+      <td>${pct(pctRec)}</td>
+      <td class="${pendiente<=0?'positive-val':'negative-val'}">${fU(pendiente)}</td>
+    </tr>`;
+  }
+
+  const totalFCF = d.freeCF * term;
+  html += `<tr class="highlight" style="font-weight:700;border-top:2px solid var(--accent)">
+    <td>TOTAL</td>
+    <td>${fU(totalFCF)}</td>
+    <td>${fU(acumInv)}</td>
+    <td>${fU(acumOp)}</td>
+    <td>${fU(acumInv)}</td>
+    <td>${equity > 0 ? pct(acumInv / equity) : '—'}</td>
+    <td class="${equity-acumInv<=0?'positive-val':'negative-val'}">${fU(equity - acumInv)}</td>
+  </tr>`;
+  html += '</tbody>';
+  t.innerHTML = html;
+
+  // Progress bar
+  const coverage = equity > 0 ? Math.min(acumInv / equity, 1.5) : 0;
+  const pctWidth = Math.min(coverage / 1.5 * 100, 100);
+  const progFill = $('debt-progress');
+  progFill.style.width = pctWidth + '%';
+  progFill.style.background = coverage >= 1 ? 'var(--green)' : coverage >= 0.7 ? 'var(--yellow)' : 'var(--red)';
+  $('debt-coverage-pct').textContent = pct(coverage);
+}
+
+function switchTab(tabEl, contentId) {
+  tabEl.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  tabEl.parentElement.nextElementSibling.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  $(contentId).classList.add('active');
+}
+
+function calc() {
+  const d = getInputs();
+  renderKPIs(d);
+  renderPnL(d);
+  renderWaterfall(d);
+  renderRevenueBreakdown(d);
+  renderSensitivityEBITDA();
+  renderSensitivityPayback();
+  renderSensitivityRent();
+  renderDebtSchedule(d);
+}
+
+const defaults = {};
+function saveDefaults() {
+  document.querySelectorAll('input').forEach(inp => {
+    defaults[inp.id] = inp.value;
+  });
+}
+function resetDefaults() {
+  Object.entries(defaults).forEach(([id, val]) => {
+    const el = $(id);
+    if (el) el.value = val;
+  });
+  syncRangeLabels();
+  // Clear URL
+  history.replaceState(null, '', window.location.pathname);
+  calc();
+}
+
+function syncRangeLabels() {
+  $('occOffPeakVal').textContent = Math.round(parseFloat($('occOffPeak').value)*100) + '%';
+  $('occPeakVal').textContent = Math.round(parseFloat($('occPeak').value)*100) + '%';
+  $('occWeekendVal').textContent = Math.round(parseFloat($('occWeekend').value)*100) + '%';
+}
+
+// --- URL state sync ---
+function updateURL() {
+  const params = new URLSearchParams();
+  document.querySelectorAll('input').forEach(inp => {
+    if (!inp.id) return;
+    if (String(inp.value) !== String(defaults[inp.id])) {
+      params.set(inp.id, inp.value);
+    }
+  });
+  const qs = params.toString();
+  const newURL = qs ? '?' + qs : window.location.pathname;
+  history.replaceState(null, '', newURL);
+}
+
+function applyURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  let applied = 0;
+  params.forEach((value, key) => {
+    const el = $(key);
+    if (el) {
+      el.value = value;
+      applied++;
+    }
+  });
+  if (applied > 0) syncRangeLabels();
+  return applied;
+}
+
+async function shareLink() {
+  const url = window.location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById('share-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+  } catch (e) {
+    prompt('Copiá este link:', url);
+  }
+}
+
+// Wrap calc() to also update URL
+const _calc = calc;
+calc = function() {
+  _calc();
+  updateURL();
+};
+
+// Init
+saveDefaults();
+applyURLParams();
+calc();
+</script>
+</body>
+</html>
