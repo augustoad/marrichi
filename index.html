@@ -343,8 +343,8 @@
       <div class="card" style="margin-bottom:12px">
         <h2><span class="icon">%</span> Ocupación por franja</h2>
         <div class="field">
-          <label>Off-Peak L-V (08-18hs): <strong id="occOffPeakVal">35%</strong></label>
-          <input type="range" id="occOffPeak" value="0.35" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+          <label>Off-Peak L-V (08-18hs): <strong id="occOffPeakVal">80%</strong></label>
+          <input type="range" id="occOffPeak" value="0.8" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
         </div>
         <div class="field">
           <label>Peak L-V (18-23hs): <strong id="occPeakVal">90%</strong></label>
@@ -446,7 +446,7 @@
         <div class="inline-fields">
           <div class="field">
             <label>Sueldos + cargas sociales</label>
-            <input type="number" id="salaries" value="5500000" min="0" step="500000" oninput="calc()">
+            <input type="number" id="salaries" value="4000000" min="0" step="500000" oninput="calc()">
           </div>
           <div class="field">
             <label>Electricidad</label>
@@ -488,8 +488,8 @@
           <input type="number" id="cautionRate" value="4" min="0" max="20" step="0.5" oninput="calc()">
         </div>
         <div class="field">
-          <label>Sueldo socios (ARS/mes)</label>
-          <input type="number" id="partnerSalary" value="0" min="0" step="500000" oninput="calc()">
+          <label>Sueldo Operadores (ARS/mes)</label>
+          <input type="number" id="partnerSalary" value="4000000" min="0" step="500000" oninput="calc()">
         </div>
       </div>
 
@@ -559,16 +559,16 @@
         <div class="inline-fields">
           <div class="field">
             <label>% Participación inversor</label>
-            <input type="number" id="investorShare" value="50" min="0" max="100" step="5" oninput="document.getElementById('operatorShare').value=Math.max(0,100-this.value);calc()">
+            <input type="number" id="investorShare" value="60" min="0" max="100" step="5" oninput="document.getElementById('operatorShare').value=Math.max(0,100-this.value);calc()">
           </div>
           <div class="field">
             <label>% Participación operadores</label>
-            <input type="number" id="operatorShare" value="50" min="0" max="100" step="5" oninput="document.getElementById('investorShare').value=Math.max(0,100-this.value);calc()">
+            <input type="number" id="operatorShare" value="40" min="0" max="100" step="5" oninput="document.getElementById('investorShare').value=Math.max(0,100-this.value);calc()">
           </div>
         </div>
         <div class="field">
           <label>Horizonte de proyección (meses)</label>
-          <input type="number" id="projectionMonths" value="36" min="6" max="120" step="6" oninput="calc()">
+          <input type="number" id="projectionMonths" value="84" min="6" max="120" step="6" oninput="calc()">
         </div>
         <div class="field">
           <label>Vida útil activos (años) — depreciación</label>
@@ -866,7 +866,7 @@ function renderPnL(d) {
       <tr><td>Marketing y publicidad</td><td class="negative-val">${uNeg(d.mkt)}</td><td>${p(-d.mkt)}</td></tr>
       <tr><td>Seguros (RC + caución)</td><td class="negative-val">${uNeg(d.totalInsurance)}</td><td>${p(-d.totalInsurance)}</td></tr>
       <tr><td>Software gestión</td><td class="negative-val">${uNeg(d.soft)}</td><td>${p(-d.soft)}</td></tr>
-      <tr><td>Sueldo socios</td><td class="negative-val">${uNeg(d.partnerSal)}</td><td>${p(-d.partnerSal)}</td></tr>
+      <tr><td>Sueldo Operadores</td><td class="negative-val">${uNeg(d.partnerSal)}</td><td>${p(-d.partnerSal)}</td></tr>
       <tr><td>Otros gastos fijos</td><td class="negative-val">${uNeg(d.otherFix)}</td><td>${p(-d.otherFix)}</td></tr>
       <tr class="subtotal"><td>Total Costos Fijos</td><td class="negative-val">${uNeg(d.totalFixed)}</td><td>${p(-d.totalFixed)}</td></tr>
 
