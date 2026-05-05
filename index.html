@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PnL Padel Indoor — Modelo Interactivo</title>
+<title>PnL Padel + Pickleball Indoor — Modelo Interactivo</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -277,8 +277,8 @@
 
 <div class="container">
   <header>
-    <h1>Padel Indoor — Modelo Financiero Interactivo</h1>
-    <p>4 canchas &middot; GBA Norte &middot; Ajustá las variables y proyectá tu PnL mensual</p>
+    <h1>Padel + Pickleball Indoor — Modelo Financiero Interactivo</h1>
+    <p>Canchas mixtas (Padel + Pickleball) &middot; GBA Norte &middot; Ajustá variables por deporte y proyectá tu PnL mensual</p>
   </header>
 
   <!-- KPI Dashboard -->
@@ -295,64 +295,135 @@
         </div>
       </div>
 
-      <!-- Infrastructure -->
+      <!-- General operations -->
       <div class="card" style="margin-bottom:12px">
-        <h2><span class="icon">C</span> Infraestructura</h2>
+        <h2><span class="icon">G</span> Operación general</h2>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Superficie total (m²)</label>
+            <input type="number" id="surfaceM2" value="714" min="100" step="50" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Días operativos / mes</label>
+            <input type="number" id="opDays" value="30" min="20" max="31" step="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Hora de inicio (apertura)</label>
+            <input type="number" id="dayStartHour" value="8" min="0" max="23" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Hora de fin (cierre)</label>
+            <input type="number" id="dayEndHour" value="24" min="1" max="24" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Días de fin de semana / mes</label>
+            <input type="number" id="weekendDays" value="8" min="0" max="14" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Horas operativas / día <span style="color:var(--text-dim);font-weight:400">(calculado)</span></label>
+            <div id="opHoursDisplay" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'SF Mono','Fira Code',monospace;font-size:14px;color:var(--text)">—</div>
+          </div>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Inicio horario peak (L-V, hora)</label>
+            <input type="number" id="peakStartHour" value="18" min="0" max="24" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Fin horario peak (L-V, hora)</label>
+            <input type="number" id="peakEndHour" value="23" min="0" max="24" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;margin-bottom:10px">
+          Fin de semana se factura íntegramente a tarifa Peak. Off-Peak L-V = horas operativas − ventana peak.
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Calendario semanal</div>
+        <div id="weekCalendar"></div>
+      </div>
+
+      <!-- Padel court type -->
+      <div class="card" style="margin-bottom:12px">
+        <h2><span class="icon" style="background:var(--accent)">P</span> Padel</h2>
         <div class="inline-fields">
           <div class="field">
             <label>Cantidad de canchas</label>
-            <input type="number" id="numCourts" value="2" min="1" max="20" step="1" oninput="calc()">
+            <input type="number" id="numCourtsPadel" value="2" min="0" max="20" step="1" oninput="calc()">
           </div>
           <div class="field">
-            <label>Superficie total (m²)</label>
-            <input type="number" id="surfaceM2" value="714" min="200" step="50" oninput="calc()">
+            <label>CAPEX por cancha (USD)</label>
+            <input type="number" id="capexPerCourtPadel" value="22500" min="0" step="500" oninput="calc()">
           </div>
+        </div>
+        <div class="field">
+          <label>Duración turno (horas)</label>
+          <input type="number" id="turnDurationPadel" value="1.5" min="0.5" max="3" step="0.5" oninput="calc()">
         </div>
         <div class="inline-fields">
           <div class="field">
-            <label>Horas operativas / día</label>
-            <input type="number" id="opHours" value="16.5" min="6" max="24" step="0.5" oninput="calc()">
+            <label>Precio Peak (ARS / turno)</label>
+            <input type="number" id="pricePeakPadel" value="60000" min="0" step="5000" oninput="calc()">
           </div>
           <div class="field">
-            <label>Duración turno (horas)</label>
-            <input type="number" id="turnDuration" value="1.5" min="0.5" max="3" step="0.5" oninput="calc()">
+            <label>Precio Off-Peak (ARS / turno)</label>
+            <input type="number" id="priceOffPeakPadel" value="45000" min="0" step="5000" oninput="calc()">
           </div>
         </div>
         <div class="field">
-          <label>Días operativos / mes</label>
-          <input type="number" id="opDays" value="30" min="20" max="31" step="1" oninput="calc()">
+          <label>Ocupación Off-Peak L-V: <strong id="occOffPeakPadelVal">80%</strong></label>
+          <input type="range" id="occOffPeakPadel" value="0.8" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakPadelVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+        </div>
+        <div class="field">
+          <label>Ocupación Peak L-V: <strong id="occPeakPadelVal">90%</strong></label>
+          <input type="range" id="occPeakPadel" value="0.9" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occPeakPadelVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+        </div>
+        <div class="field">
+          <label>Ocupación Finde: <strong id="occWeekendPadelVal">85%</strong></label>
+          <input type="range" id="occWeekendPadel" value="0.85" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occWeekendPadelVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
         </div>
       </div>
 
-      <!-- Pricing -->
+      <!-- Pickleball court type -->
       <div class="card" style="margin-bottom:12px">
-        <h2><span class="icon">$</span> Precios por turno (ARS)</h2>
+        <h2><span class="icon" style="background:var(--green)">B</span> Pickleball</h2>
         <div class="inline-fields">
           <div class="field">
-            <label>Peak (18-23hs L-V + Finde)</label>
-            <input type="number" id="pricePeak" value="60000" min="10000" step="5000" oninput="calc()">
+            <label>Cantidad de canchas</label>
+            <input type="number" id="numCourtsPickleball" value="2" min="0" max="20" step="1" oninput="calc()">
           </div>
           <div class="field">
-            <label>Off-Peak (08-18hs L-V)</label>
-            <input type="number" id="priceOffPeak" value="45000" min="10000" step="5000" oninput="calc()">
+            <label>CAPEX por cancha (USD)</label>
+            <input type="number" id="capexPerCourtPickleball" value="12000" min="0" step="500" oninput="calc()">
           </div>
         </div>
-      </div>
-
-      <!-- Occupancy -->
-      <div class="card" style="margin-bottom:12px">
-        <h2><span class="icon">%</span> Ocupación por franja</h2>
         <div class="field">
-          <label>Off-Peak L-V (08-18hs): <strong id="occOffPeakVal">80%</strong></label>
-          <input type="range" id="occOffPeak" value="0.8" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+          <label>Duración turno (horas)</label>
+          <input type="number" id="turnDurationPickleball" value="1" min="0.5" max="3" step="0.5" oninput="calc()">
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Precio Peak (ARS / turno)</label>
+            <input type="number" id="pricePeakPickleball" value="25000" min="0" step="1000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Precio Off-Peak (ARS / turno)</label>
+            <input type="number" id="priceOffPeakPickleball" value="18000" min="0" step="1000" oninput="calc()">
+          </div>
         </div>
         <div class="field">
-          <label>Peak L-V (18-23hs): <strong id="occPeakVal">90%</strong></label>
-          <input type="range" id="occPeak" value="0.9" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occPeakVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+          <label>Ocupación Off-Peak L-V: <strong id="occOffPeakPickleballVal">50%</strong></label>
+          <input type="range" id="occOffPeakPickleball" value="0.5" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occOffPeakPickleballVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--green)">
         </div>
         <div class="field">
-          <label>Finde (08-23hs): <strong id="occWeekendVal">85%</strong></label>
-          <input type="range" id="occWeekend" value="0.85" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occWeekendVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--accent)">
+          <label>Ocupación Peak L-V: <strong id="occPeakPickleballVal">70%</strong></label>
+          <input type="range" id="occPeakPickleball" value="0.7" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occPeakPickleballVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--green)">
+        </div>
+        <div class="field">
+          <label>Ocupación Finde: <strong id="occWeekendPickleballVal">65%</strong></label>
+          <input type="range" id="occWeekendPickleball" value="0.65" min="0" max="1" step="0.05" oninput="calc();document.getElementById('occWeekendPickleballVal').textContent=Math.round(this.value*100)+'%'" style="accent-color:var(--green)">
         </div>
       </div>
 
@@ -513,8 +584,9 @@
         <h2><span class="icon">K</span> CAPEX e inversión (USD)</h2>
         <div class="inline-fields">
           <div class="field">
-            <label>Construcción canchas (2 × ~22.5K)</label>
-            <input type="number" id="capexCourts" value="45000" min="0" step="5000" oninput="calc()">
+            <label>Construcción canchas (calculado)</label>
+            <div id="capexCourtsDisplay" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'SF Mono','Fira Code',monospace;font-size:14px;color:var(--text)">USD 0</div>
+            <div class="unit" id="capexCourtsBreakdown">Padel: USD 0 · Pickleball: USD 0</div>
           </div>
           <div class="field">
             <label>Obra civil (recep, vest, bar, kinesio)</label>
@@ -641,40 +713,113 @@ const fmtFull = n => n.toLocaleString('es-AR', {maximumFractionDigits:0});
 const pct = n => (n*100).toFixed(1) + '%';
 
 function getInputs() {
-  const courts = v('numCourts');
   const surface = v('surfaceM2');
-  const opHours = v('opHours');
-  const turnDur = v('turnDuration');
+  const dayStart = v('dayStartHour');
+  const dayEnd = v('dayEndHour');
+  const opHours = Math.max(0, dayEnd - dayStart);
   const opDays = v('opDays');
-  const pricePeak = v('pricePeak');
-  const priceOffPeak = v('priceOffPeak');
-  const occOffPeak = v('occOffPeak');
-  const occPeak = v('occPeak');
-  const occWeekend = v('occWeekend');
-  const turnsPerCourtDay = Math.floor(opHours / turnDur);
+  const weekendDays = Math.min(opDays, Math.max(0, v('weekendDays')));
+  const weekdays = Math.max(0, opDays - weekendDays);
+  const peakStartRaw = v('peakStartHour');
+  const peakEndRaw = v('peakEndHour');
+  // Clamp peak window to operating hours
+  const peakStart = Math.min(Math.max(peakStartRaw, dayStart), dayEnd);
+  const peakEnd = Math.min(Math.max(peakEndRaw, peakStart), dayEnd);
+  const peakHours = Math.max(0, peakEnd - peakStart);
+  const offPeakHoursWeekday = Math.max(0, opHours - peakHours);
 
-  // Turn distribution: weekday = 22 days, weekend = 8 days
-  const weekdays = 22;
-  const weekendDays = opDays - weekdays;
+  const courtTypeDefs = [
+    {
+      key: 'padel',
+      label: 'Padel',
+      courts: v('numCourtsPadel'),
+      capexPerCourt: v('capexPerCourtPadel'),
+      turnDur: v('turnDurationPadel'),
+      pricePeak: v('pricePeakPadel'),
+      priceOffPeak: v('priceOffPeakPadel'),
+      occOffPeak: v('occOffPeakPadel'),
+      occPeak: v('occPeakPadel'),
+      occWeekend: v('occWeekendPadel'),
+    },
+    {
+      key: 'pickleball',
+      label: 'Pickleball',
+      courts: v('numCourtsPickleball'),
+      capexPerCourt: v('capexPerCourtPickleball'),
+      turnDur: v('turnDurationPickleball'),
+      pricePeak: v('pricePeakPickleball'),
+      priceOffPeak: v('priceOffPeakPickleball'),
+      occOffPeak: v('occOffPeakPickleball'),
+      occPeak: v('occPeakPickleball'),
+      occWeekend: v('occWeekendPickleball'),
+    },
+  ];
 
-  // Off-peak: 07-18 = 11 hours, Peak = remaining turns of the day
-  const offPeakHours = 11; // 07:00-18:00
-  const offPeakTurnsPerCourt = Math.floor(offPeakHours / turnDur);
-  const peakTurnsPerCourt = turnsPerCourtDay - offPeakTurnsPerCourt;
-  const weekendTurnsPerCourt = turnsPerCourtDay;
+  let totalRevCourts = 0;
+  let totalOffPeakGross = 0, totalPeakGross = 0, totalWeekendGross = 0;
+  let totalOffPeakEff = 0, totalPeakEff = 0, totalWeekendEff = 0;
+  let totalCourtsCount = 0;
+  let totalCourtsCapexUSD = 0;
+  const courtTypes = [];
 
-  // Gross potential
-  const offPeakGross = offPeakTurnsPerCourt * weekdays * courts;
-  const peakGross = peakTurnsPerCourt * weekdays * courts;
-  const weekendGross = weekendTurnsPerCourt * weekendDays * courts;
+  for (const t of courtTypeDefs) {
+    if (t.courts <= 0 || t.turnDur <= 0) {
+      courtTypes.push({ ...t, turnsPerDay: 0,
+        offPeakGross: 0, peakGross: 0, weekendGross: 0,
+        offPeakEff: 0, peakEff: 0, weekendEff: 0,
+        offPeakRev: 0, peakRev: 0, weekendRev: 0,
+        revCourts: 0, totalGross: 0, totalEff: 0,
+        capexUSD: t.courts * t.capexPerCourt });
+      totalCourtsCapexUSD += t.courts * t.capexPerCourt;
+      totalCourtsCount += t.courts;
+      continue;
+    }
+    const turnsPerDay = Math.floor(opHours / t.turnDur);
+    const offPeakTurnsPerCourt = Math.floor(offPeakHoursWeekday / t.turnDur);
+    const peakTurnsPerCourt = Math.max(0, turnsPerDay - offPeakTurnsPerCourt);
+    const weekendTurnsPerCourt = turnsPerDay;
 
-  // Effective
-  const offPeakEff = offPeakGross * occOffPeak;
-  const peakEff = peakGross * occPeak;
-  const weekendEff = weekendGross * occWeekend;
+    const offPeakGross = offPeakTurnsPerCourt * weekdays * t.courts;
+    const peakGross = peakTurnsPerCourt * weekdays * t.courts;
+    const weekendGross = weekendTurnsPerCourt * weekendDays * t.courts;
 
-  // Revenue from courts
-  const revCourts = offPeakEff * priceOffPeak + peakEff * pricePeak + weekendEff * pricePeak;
+    const offPeakEff = offPeakGross * t.occOffPeak;
+    const peakEff = peakGross * t.occPeak;
+    const weekendEff = weekendGross * t.occWeekend;
+
+    const offPeakRev = offPeakEff * t.priceOffPeak;
+    const peakRev = peakEff * t.pricePeak;
+    const weekendRev = weekendEff * t.pricePeak;
+    const revCourts = offPeakRev + peakRev + weekendRev;
+
+    totalRevCourts += revCourts;
+    totalOffPeakGross += offPeakGross; totalPeakGross += peakGross; totalWeekendGross += weekendGross;
+    totalOffPeakEff += offPeakEff; totalPeakEff += peakEff; totalWeekendEff += weekendEff;
+    totalCourtsCount += t.courts;
+    totalCourtsCapexUSD += t.courts * t.capexPerCourt;
+
+    courtTypes.push({ ...t, turnsPerDay,
+      offPeakGross, peakGross, weekendGross,
+      offPeakEff, peakEff, weekendEff,
+      offPeakRev, peakRev, weekendRev,
+      revCourts,
+      totalGross: offPeakGross + peakGross + weekendGross,
+      totalEff: offPeakEff + peakEff + weekendEff,
+      capexUSD: t.courts * t.capexPerCourt,
+    });
+  }
+
+  const totalGrossTurns = totalOffPeakGross + totalPeakGross + totalWeekendGross;
+  const totalEffTurns = totalOffPeakEff + totalPeakEff + totalWeekendEff;
+  const peakPlusWeekendGross = totalPeakGross + totalWeekendGross;
+
+  // Blended prices (gross-turns-weighted) — used for sensitivity tables
+  const blendedOffPeakPrice = totalOffPeakGross > 0
+    ? courtTypes.reduce((s, t) => s + t.offPeakGross * t.priceOffPeak, 0) / totalOffPeakGross
+    : 0;
+  const blendedPeakPrice = peakPlusWeekendGross > 0
+    ? courtTypes.reduce((s, t) => s + (t.peakGross + t.weekendGross) * t.pricePeak, 0) / peakPlusWeekendGross
+    : 0;
 
   // Other revenue
   const revSchool = v('revSchool');
@@ -684,7 +829,7 @@ function getInputs() {
   const revKinesio = v('revKinesio');
   const revOtherInc = v('revOther');
 
-  const grossRevenue = revCourts + revSchool + revCantina + revTournaments + revShop + revKinesio + revOtherInc;
+  const grossRevenue = totalRevCourts + revSchool + revCantina + revTournaments + revShop + revKinesio + revOtherInc;
 
   // IIBB
   const iibbRate = v('taxIIBB') / 100;
@@ -692,7 +837,7 @@ function getInputs() {
   const netRevenue = grossRevenue - iibb;
 
   // Variable costs
-  const commPlatform = revCourts * (v('commPlatform') / 100);
+  const commPlatform = totalRevCourts * (v('commPlatform') / 100);
   const cogsCant = revCantina * (v('cogsCantina') / 100);
   const teacherFees = revSchool * (v('teacherFee') / 100);
   const cogsShop = revShop * (v('cogsShop') / 100);
@@ -721,49 +866,49 @@ function getInputs() {
 
   const ebitda = contributionMargin - totalFixed;
 
-  // CAPEX — total invested by investor
-  const capex = (v('capexCourts') + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture') + v('capexMarketing') + v('capexWorkingCap'));
+  // CAPEX — courts CAPEX is computed from per-court inputs
+  const capexCourtsUSD = totalCourtsCapexUSD;
+  const capex = capexCourtsUSD + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture') + v('capexMarketing') + v('capexWorkingCap');
   const capexARS = capex * fx;
 
-  // Depreciation — only physical fixed assets (NOT working capital, NOT launch marketing)
-  const depreciableUSD = v('capexCourts') + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture');
+  // Depreciation — only physical fixed assets
+  const depreciableUSD = capexCourtsUSD + v('capexCivil') + v('capexHVAC') + v('capexCantina') + v('capexFurniture');
   const depreciableARS = depreciableUSD * fx;
   const depreciation = depreciableARS / v('assetLife') / 12;
 
   const ebit = ebitda - depreciation;
-
-  // Income tax (no debt = no interest)
   const incomeTax = ebit > 0 ? ebit * (v('taxIncome') / 100) : 0;
   const netIncome = ebit - incomeTax;
 
-  // Occupancy weighted
-  const totalTurns = offPeakGross + peakGross + weekendGross;
-  const effTurns = offPeakEff + peakEff + weekendEff;
-  const occWeighted = totalTurns > 0 ? effTurns / totalTurns : 0;
-
-  // Free cash flow = EBITDA - Income Tax (no debt → no interest)
+  const occWeighted = totalGrossTurns > 0 ? totalEffTurns / totalGrossTurns : 0;
   const freeCF = ebitda - incomeTax;
 
-  // Equity / Investor distribution
   const investorShare = v('investorShare') / 100;
   const operatorShare = 1 - investorShare;
   const investorCF = freeCF * investorShare;
   const operatorCF = freeCF * operatorShare;
   const projectionMonths = v('projectionMonths');
 
-  // Payback for investor: months to recover their full equity from their share of FCF
-  const investorEquityARS = capexARS; // Investor put 100% of CAPEX
+  const investorEquityARS = capexARS;
   const paybackMonths = investorCF > 0 ? investorEquityARS / investorCF : Infinity;
   const paybackYears = paybackMonths / 12;
   const freeCFAnnual = freeCF * 12;
 
   return {
-    courts, surface, turnsPerCourtDay, opDays,
-    pricePeak, priceOffPeak,
-    occOffPeak, occPeak, occWeekend, occWeighted,
-    offPeakGross, peakGross, weekendGross, totalTurns,
-    offPeakEff, peakEff, weekendEff, effTurns,
-    revCourts, revSchool, revCantina, revTournaments, revShop, revKinesio, revOtherInc,
+    surface, opHours, opDays, weekdays, weekendDays,
+    dayStart, dayEnd,
+    peakStart, peakEnd, peakHours, offPeakHoursWeekday,
+    courtTypes, totalCourtsCount, capexCourtsUSD,
+    // aliases preserved for downstream consumers
+    courts: totalCourtsCount,
+    revCourts: totalRevCourts,
+    offPeakGross: totalOffPeakGross, peakGross: totalPeakGross, weekendGross: totalWeekendGross,
+    offPeakEff: totalOffPeakEff, peakEff: totalPeakEff, weekendEff: totalWeekendEff,
+    totalTurns: totalGrossTurns, effTurns: totalEffTurns,
+    pricePeak: blendedPeakPrice, priceOffPeak: blendedOffPeakPrice,
+    blendedPeakPrice, blendedOffPeakPrice,
+    occWeighted,
+    revSchool, revCantina, revTournaments, revShop, revKinesio, revOtherInc,
     grossRevenue, iibb, iibbRate, netRevenue,
     commPlatform, cogsCant, teacherFees, cogsShop, kinesioFees, paymentComm, consumablesCost, totalVarCosts,
     contributionMargin,
@@ -945,24 +1090,20 @@ function renderRevenueBreakdown(d) {
   `;
 }
 
-function computeEBITDAForSensitivity(occWeighted, peakPrice) {
+function computeEBITDAForSensitivity(occWeighted, peakPriceMult) {
   const d = getInputs();
-  // Recalculate revenue from courts using weighted occupancy
-  const totalPotentialTurns = d.totalTurns;
-  const effTurns = totalPotentialTurns * occWeighted;
-  // Approximate: use a weighted average price
-  const offPeakShare = d.offPeakGross / d.totalTurns;
-  const peakShare = (d.peakGross + d.weekendGross) / d.totalTurns;
-  const offPeakPrice = d.priceOffPeak;
-  // Recalc with new peak price
-  const avgPrice = offPeakShare * offPeakPrice + peakShare * peakPrice;
+  const totalGross = d.totalTurns;
+  if (totalGross === 0) return d.ebitda;
+  const effTurns = totalGross * occWeighted;
+  const offPeakShare = d.offPeakGross / totalGross;
+  const peakShare = 1 - offPeakShare;
+  const avgPrice = offPeakShare * d.blendedOffPeakPrice + peakShare * (d.blendedPeakPrice * peakPriceMult);
   const revCourts = effTurns * avgPrice;
 
   const grossRev = revCourts + d.revSchool + d.revCantina + d.revTournaments + d.revShop + d.revKinesio + d.revOtherInc;
   const iibb = grossRev * d.iibbRate;
   const netRev = grossRev - iibb;
 
-  // Variable costs (recalculated)
   const commPlat = revCourts * (v('commPlatform') / 100);
   const cogsCant = d.revCantina * (v('cogsCantina') / 100);
   const teacherF = d.revSchool * (v('teacherFee') / 100);
@@ -971,34 +1112,36 @@ function computeEBITDAForSensitivity(occWeighted, peakPrice) {
   const payComm = grossRev * (v('paymentComm') / 100);
   const totalVar = commPlat + cogsCant + teacherF + cogsShopS + kinesioFS + payComm + d.consumablesCost;
 
-  const contribMargin = netRev - totalVar;
-  const ebitda = contribMargin - d.totalFixed;
-  return ebitda;
+  return (netRev - totalVar) - d.totalFixed;
+}
+
+const SENSE_PRICE_MULTS = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4];
+
+function multLabel(m) {
+  if (Math.abs(m - 1.0) < 0.01) return 'Base';
+  return (m > 1 ? '+' : '') + Math.round((m - 1) * 100) + '%';
 }
 
 function renderSensitivityEBITDA() {
   const d = getInputs();
   const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
-  const prices = [35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000];
-  const currentOcc = d.occWeighted;
-  const currentPrice = d.pricePeak;
-
   const fx = d.fx;
   let html = '<thead><tr><th>EBITDA (USD/mes)</th>';
-  prices.forEach(p => {
-    const isCurrent = p === currentPrice;
-    html += `<th${isCurrent?' style="color:var(--yellow)"':''}>${fmtFull(p)}</th>`;
+  SENSE_PRICE_MULTS.forEach(m => {
+    const isCurrent = Math.abs(m - 1.0) < 0.01;
+    const subPrice = d.blendedPeakPrice ? fmtFull(Math.round(d.blendedPeakPrice * m)) : '—';
+    html += `<th${isCurrent ? ' style="color:var(--yellow)"' : ''}>${multLabel(m)}<br><span style="font-size:9px;font-weight:400;color:var(--text-dim)">${subPrice}</span></th>`;
   });
   html += '</tr></thead><tbody>';
 
   occs.forEach(occ => {
     html += `<tr><td>${pct(occ)}</td>`;
-    prices.forEach(price => {
-      const ebitda = computeEBITDAForSensitivity(occ, price);
-      const isBase = Math.abs(occ - currentOcc) < 0.03 && price === currentPrice;
+    SENSE_PRICE_MULTS.forEach(m => {
+      const ebitda = computeEBITDAForSensitivity(occ, m);
+      const isBase = Math.abs(occ - d.occWeighted) < 0.03 && Math.abs(m - 1.0) < 0.01;
       let cls = ebitda > 0 ? 'cell-green' : 'cell-red';
       if (isBase) cls = 'cell-yellow';
-      html += `<td class="${cls}">${fmtFull(Math.round(ebitda/fx))}</td>`;
+      html += `<td class="${cls}">${fmtFull(Math.round(ebitda / fx))}</td>`;
     });
     html += '</tr>';
   });
@@ -1009,16 +1152,18 @@ function renderSensitivityEBITDA() {
 function renderSensitivityPayback() {
   const d = getInputs();
   const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
-  const prices = [35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000];
 
   let html = '<thead><tr><th>Payback (años)</th>';
-  prices.forEach(p => html += `<th>${fmtFull(p)}</th>`);
+  SENSE_PRICE_MULTS.forEach(m => {
+    const subPrice = d.blendedPeakPrice ? fmtFull(Math.round(d.blendedPeakPrice * m)) : '—';
+    html += `<th>${multLabel(m)}<br><span style="font-size:9px;font-weight:400;color:var(--text-dim)">${subPrice}</span></th>`;
+  });
   html += '</tr></thead><tbody>';
 
   occs.forEach(occ => {
     html += `<tr><td>${pct(occ)}</td>`;
-    prices.forEach(price => {
-      const ebitda = computeEBITDAForSensitivity(occ, price);
+    SENSE_PRICE_MULTS.forEach(m => {
+      const ebitda = computeEBITDAForSensitivity(occ, m);
       const ebitSens = ebitda - d.depreciation;
       const taxSens = ebitSens > 0 ? ebitSens * (v('taxIncome') / 100) : 0;
       const fcfSens = ebitda - taxSens;
@@ -1027,7 +1172,6 @@ function renderSensitivityPayback() {
       let cls = 'cell-red';
       if (payback <= 2) cls = 'cell-green';
       else if (payback <= 4) cls = 'cell-orange';
-      else if (payback !== Infinity) cls = 'cell-red';
       const display = payback === Infinity ? '—' : payback.toFixed(1);
       html += `<td class="${cls}">${display}</td>`;
     });
@@ -1042,9 +1186,6 @@ function renderSensitivityRent() {
   const rents = [4, 5, 6, 7, 8, 9, 10];
   const occs = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
 
-  // Fixed costs without rent
-  const fixedNoRent = d.totalFixed - d.rent;
-
   const fx = d.fx;
   let html = '<thead><tr><th>EBITDA (USD/mes)</th>';
   occs.forEach(o => html += `<th>${pct(o)}</th>`);
@@ -1054,20 +1195,99 @@ function renderSensitivityRent() {
     html += `<tr><td>USD ${rentUsd}/m²</td>`;
     occs.forEach(occ => {
       const rentARS = d.surface * rentUsd * d.fx;
-      const caution = rentARS * 12 * (v('cautionRate') / 100) / 12;
+      const caution = rentARS * (v('cautionRate') / 100);
       const rentDiff = rentARS - d.rent;
       const cautionDiff = caution - d.caution;
-      const ebitdaBase = computeEBITDAForSensitivity(occ, d.pricePeak);
+      const ebitdaBase = computeEBITDAForSensitivity(occ, 1.0);
       const ebitda = ebitdaBase - rentDiff - cautionDiff;
       const isBase = rentUsd === v('rentUsdM2') && Math.abs(occ - d.occWeighted) < 0.03;
       let cls = ebitda > 0 ? 'cell-green' : 'cell-red';
       if (isBase) cls = 'cell-yellow';
-      html += `<td class="${cls}">${fmtFull(Math.round(ebitda/fx))}</td>`;
+      html += `<td class="${cls}">${fmtFull(Math.round(ebitda / fx))}</td>`;
     });
     html += '</tr>';
   });
   html += '</tbody>';
   $('sense-rent-table').innerHTML = html;
+}
+
+function renderCalendar(d) {
+  const el = $('weekCalendar');
+  if (!el) return;
+  const days = [
+    { code: 'L', label: 'Lunes', isWeekend: false },
+    { code: 'M', label: 'Martes', isWeekend: false },
+    { code: 'X', label: 'Miércoles', isWeekend: false },
+    { code: 'J', label: 'Jueves', isWeekend: false },
+    { code: 'V', label: 'Viernes', isWeekend: false },
+    { code: 'S', label: 'Sábado', isWeekend: true },
+    { code: 'D', label: 'Domingo', isWeekend: true },
+  ];
+  const HOURS = 24;
+  const cellSize = `minmax(0, 1fr)`;
+
+  // Header row: hours
+  let header = `<div style="display:grid;grid-template-columns:36px repeat(${HOURS}, ${cellSize});gap:2px;font-size:9px;color:var(--text-dim);margin-bottom:2px"><div></div>`;
+  for (let h = 0; h < HOURS; h++) {
+    header += `<div style="text-align:center">${h % 3 === 0 ? h : ''}</div>`;
+  }
+  header += '</div>';
+
+  let rows = '';
+  for (const day of days) {
+    let row = `<div style="display:grid;grid-template-columns:36px repeat(${HOURS}, ${cellSize});gap:2px;margin-bottom:2px;align-items:center">`;
+    row += `<div style="font-size:11px;color:var(--text-dim);font-weight:600">${day.code}</div>`;
+    for (let h = 0; h < HOURS; h++) {
+      const isOpen = h >= Math.floor(d.dayStart) && h < Math.ceil(d.dayEnd);
+      let bg = 'transparent';
+      let title = '';
+      if (!isOpen) {
+        bg = 'var(--surface2)';
+        title = 'Cerrado';
+      } else if (day.isWeekend) {
+        bg = 'var(--accent)';
+        title = `${day.label} ${h}:00 — Peak (finde)`;
+      } else {
+        const isPeak = h >= d.peakStart && h < d.peakEnd;
+        if (isPeak) {
+          bg = 'var(--accent)';
+          title = `${day.label} ${h}:00 — Peak`;
+        } else {
+          bg = 'var(--green)';
+          title = `${day.label} ${h}:00 — Off-Peak`;
+        }
+      }
+      row += `<div title="${title}" style="height:16px;border-radius:2px;background:${bg};opacity:${isOpen ? 0.85 : 0.25}"></div>`;
+    }
+    row += '</div>';
+    rows += row;
+  }
+
+  const legend = `
+    <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:11px;margin-top:8px;color:var(--text-dim)">
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:var(--green);opacity:0.85"></div>Off-Peak (L-V)</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:var(--accent);opacity:0.85"></div>Peak (L-V) y Finde</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:var(--surface2);opacity:0.5;border:1px solid var(--border)"></div>Cerrado</div>
+      <div style="margin-left:auto">Apertura ${d.dayStart}:00 → Cierre ${d.dayEnd}:00 · ${d.opHours}h/día · Peak ${d.peakStart}:00–${d.peakEnd}:00 (${d.peakHours}h)</div>
+    </div>`;
+
+  el.innerHTML = header + rows + legend;
+}
+
+function updateDerivedDisplays(d) {
+  const opEl = $('opHoursDisplay');
+  if (opEl) opEl.textContent = `${d.opHours} h/día`;
+
+  const capexEl = $('capexCourtsDisplay');
+  if (capexEl) capexEl.textContent = `USD ${fmtFull(d.capexCourtsUSD)}`;
+
+  const breakdownEl = $('capexCourtsBreakdown');
+  if (breakdownEl && d.courtTypes) {
+    const parts = d.courtTypes.map(t =>
+      `${t.label}: ${t.courts} × USD ${fmtFull(t.capexPerCourt)} = USD ${fmtFull(t.capexUSD)}`
+    );
+    breakdownEl.textContent = parts.join(' · ');
+  }
 }
 
 function renderDebtSchedule(d) {
@@ -1134,6 +1354,8 @@ function switchTab(tabEl, contentId) {
 
 function calc() {
   const d = getInputs();
+  updateDerivedDisplays(d);
+  renderCalendar(d);
   renderKPIs(d);
   renderPnL(d);
   renderWaterfall(d);
@@ -1162,9 +1384,18 @@ function resetDefaults() {
 }
 
 function syncRangeLabels() {
-  $('occOffPeakVal').textContent = Math.round(parseFloat($('occOffPeak').value)*100) + '%';
-  $('occPeakVal').textContent = Math.round(parseFloat($('occPeak').value)*100) + '%';
-  $('occWeekendVal').textContent = Math.round(parseFloat($('occWeekend').value)*100) + '%';
+  const pairs = [
+    ['occOffPeakPadel', 'occOffPeakPadelVal'],
+    ['occPeakPadel', 'occPeakPadelVal'],
+    ['occWeekendPadel', 'occWeekendPadelVal'],
+    ['occOffPeakPickleball', 'occOffPeakPickleballVal'],
+    ['occPeakPickleball', 'occPeakPickleballVal'],
+    ['occWeekendPickleball', 'occWeekendPickleballVal'],
+  ];
+  for (const [src, dst] of pairs) {
+    const s = $(src), d = $(dst);
+    if (s && d) d.textContent = Math.round(parseFloat(s.value) * 100) + '%';
+  }
 }
 
 // --- URL state sync ---
